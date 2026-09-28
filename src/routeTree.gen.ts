@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as TSlugRouteImport } from './routes/t.$slug'
+import { Route as TSlugIndexRouteImport } from './routes/t.$slug.index'
 import { Route as TSlugCreatedRouteImport } from './routes/t.$slug.created'
 import { Route as TSlugManageRouteImport } from './routes/t.$slug.manage'
 import { Route as TSlugMatchMatchIdRouteImport } from './routes/t.$slug.match.$matchId'
@@ -32,6 +33,11 @@ const TSlugRoute = TSlugRouteImport.update({
   id: '/t/$slug',
   path: '/t/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TSlugIndexRoute = TSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TSlugRoute,
 } as any)
 const TSlugCreatedRoute = TSlugCreatedRouteImport.update({
   id: '/created',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/t/$slug': typeof TSlugRouteWithChildren
   '/t/$slug/created': typeof TSlugCreatedRoute
   '/t/$slug/manage': typeof TSlugManageRoute
+  '/t/$slug/': typeof TSlugIndexRoute
   '/t/$slug/match/$matchId': typeof TSlugMatchMatchIdRoute
   '/t/$slug/player/$playerId': typeof TSlugPlayerPlayerIdRoute
   '/t/$slug/team/$teamId': typeof TSlugTeamTeamIdRoute
@@ -72,9 +79,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
-  '/t/$slug': typeof TSlugRouteWithChildren
   '/t/$slug/created': typeof TSlugCreatedRoute
   '/t/$slug/manage': typeof TSlugManageRoute
+  '/t/$slug': typeof TSlugIndexRoute
   '/t/$slug/match/$matchId': typeof TSlugMatchMatchIdRoute
   '/t/$slug/player/$playerId': typeof TSlugPlayerPlayerIdRoute
   '/t/$slug/team/$teamId': typeof TSlugTeamTeamIdRoute
@@ -86,6 +93,7 @@ export interface FileRoutesById {
   '/t/$slug': typeof TSlugRouteWithChildren
   '/t/$slug/created': typeof TSlugCreatedRoute
   '/t/$slug/manage': typeof TSlugManageRoute
+  '/t/$slug/': typeof TSlugIndexRoute
   '/t/$slug/match/$matchId': typeof TSlugMatchMatchIdRoute
   '/t/$slug/player/$playerId': typeof TSlugPlayerPlayerIdRoute
   '/t/$slug/team/$teamId': typeof TSlugTeamTeamIdRoute
@@ -98,6 +106,7 @@ export interface FileRouteTypes {
     | '/t/$slug'
     | '/t/$slug/created'
     | '/t/$slug/manage'
+    | '/t/$slug/'
     | '/t/$slug/match/$matchId'
     | '/t/$slug/player/$playerId'
     | '/t/$slug/team/$teamId'
@@ -105,9 +114,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/create'
-    | '/t/$slug'
     | '/t/$slug/created'
     | '/t/$slug/manage'
+    | '/t/$slug'
     | '/t/$slug/match/$matchId'
     | '/t/$slug/player/$playerId'
     | '/t/$slug/team/$teamId'
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/t/$slug'
     | '/t/$slug/created'
     | '/t/$slug/manage'
+    | '/t/$slug/'
     | '/t/$slug/match/$matchId'
     | '/t/$slug/player/$playerId'
     | '/t/$slug/team/$teamId'
@@ -151,6 +161,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/t/$slug'
       preLoaderRoute: typeof TSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/t/$slug/': {
+      id: '/t/$slug/'
+      path: '/'
+      fullPath: '/t/$slug/'
+      preLoaderRoute: typeof TSlugIndexRouteImport
+      parentRoute: typeof TSlugRoute
     }
     '/t/$slug/created': {
       id: '/t/$slug/created'
@@ -193,6 +210,7 @@ declare module '@tanstack/react-router' {
 interface TSlugRouteChildren {
   TSlugCreatedRoute: typeof TSlugCreatedRoute
   TSlugManageRoute: typeof TSlugManageRoute
+  TSlugIndexRoute: typeof TSlugIndexRoute
   TSlugMatchMatchIdRoute: typeof TSlugMatchMatchIdRoute
   TSlugPlayerPlayerIdRoute: typeof TSlugPlayerPlayerIdRoute
   TSlugTeamTeamIdRoute: typeof TSlugTeamTeamIdRoute
@@ -201,6 +219,7 @@ interface TSlugRouteChildren {
 const TSlugRouteChildren: TSlugRouteChildren = {
   TSlugCreatedRoute: TSlugCreatedRoute,
   TSlugManageRoute: TSlugManageRoute,
+  TSlugIndexRoute: TSlugIndexRoute,
   TSlugMatchMatchIdRoute: TSlugMatchMatchIdRoute,
   TSlugPlayerPlayerIdRoute: TSlugPlayerPlayerIdRoute,
   TSlugTeamTeamIdRoute: TSlugTeamTeamIdRoute,
