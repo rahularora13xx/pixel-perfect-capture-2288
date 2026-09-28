@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Kickoff architecture
+- Treat anonymous organiser URLs and temporary scorer sessions as capability credentials; all writes use validated server functions because public links must remain read-only.
+- Derive tables and player statistics from matches and events instead of storing duplicate totals, so corrections remain consistent.
+- Keep public tournament screens in shared feature components and thin route files, so live updates and navigation stay consistent across detail pages.
