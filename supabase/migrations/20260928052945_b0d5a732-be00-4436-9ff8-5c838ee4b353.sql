@@ -1,0 +1,3 @@
+CREATE POLICY "No public access to tournament secrets" ON public.tournament_secrets FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
+CREATE POLICY "No public access to scorer sessions" ON public.scorer_sessions FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
+CREATE POLICY "No public access to pin attempts" ON public.pin_attempts FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
