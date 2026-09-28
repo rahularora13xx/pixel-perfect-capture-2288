@@ -3,6 +3,9 @@
 ## Goal
 Build the mobile-first Kickoff app from the uploaded brief: create and manage amateur football tournaments without accounts, share public and secret organiser links, score matches live, and track tables, brackets, teams, players, and stats.
 
+## Scope guarantee
+This plan does not remove or alter anything in the uploaded brief. The sections below group its requirements for implementation; the original brief remains the source of truth, including every stated format option, validation rule, match state, statistic, page, sharing feature, and display detail. The added security language only explains how the requested protected organiser and scorer access will be implemented.
+
 ## What will be built
 1. **Foundation and data**
    - Add Lovable Cloud tables for tournaments, teams, players, matches, lineups, match events, and penalties.
@@ -27,11 +30,13 @@ Build the mobile-first Kickoff app from the uploaded brief: create and manage am
    - Build lineup selection, match clock controls, goals, cards, substitutions, undo/edit/delete, extra time, shootouts, and Player of the Match.
    - Enforce match rules server-side, including second-yellow reds, substitution limits, sent-off players, goalkeeper changes, and shootout completion.
    - Automatically update standings, clean sheets, and knockout progression.
+   - Preserve the exact clock states and notation, own-goal behavior, second-yellow conversion, goalkeeper rules, five-kick shootouts with sudden death, result labels, and Player of the Match flow from the brief.
 
 5. **Sharing and finish**
    - Add public-link copying and WhatsApp sharing.
    - Generate a 1080×1350 downloadable result image in the browser.
    - Apply the requested dark, sporty visual system with one bright accent, large thumb-friendly controls, and kit-colour chips.
+   - Keep placeholder content for matches that have not been played so each requested page looks complete.
    - Verify creation, viewing, organiser, PIN scoring, live update, and mobile flows; run security checks.
 
 ## Technical details
