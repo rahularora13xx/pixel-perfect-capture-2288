@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { getTournament } from "@/lib/kickoff.functions";
-import { TournamentView } from "@/components/kickoff/tournament-view";
-export const Route=createFileRoute("/t/$slug")({loader:({params})=>getTournament({data:{slug:params.slug}}),head:({loaderData})=>({meta:[{title:`${loaderData?.tournament.name??"Tournament"} — Kickoff`},{name:"description",content:`Fixtures, live scores and stats for ${loaderData?.tournament.name??"this tournament"}.`},{property:"og:title",content:`${loaderData?.tournament.name??"Tournament"} — Kickoff`},{property:"og:description",content:"Fixtures, live scores, tables and player stats."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Page});function Page(){return <TournamentView data={Route.useLoaderData()}/>}
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/t/$slug")({
+  component: () => <Outlet />,
+});
