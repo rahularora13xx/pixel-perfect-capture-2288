@@ -24,7 +24,9 @@ export function getRemembered(): RememberedTournament[] {
 }
 export function rememberTournament(item: RememberedTournament) {
   if (typeof window === "undefined") return;
-  const next = [item, ...getRemembered().filter((x) => x.slug !== item.slug)].slice(0, 12);
+  const previous = getRemembered().find(x => x.slug === item.slug);
+  const retained = !item.organiserUrl && previous?.organiserUrl ? { ...item, organiserUrl: previous.organiserUrl } : item;
+  const next = [retained, ...getRemembered().filter((x) => x.slug !== item.slug)].slice(0, 12);
   localStorage.setItem(KEY, JSON.stringify(next));
 }
 export function teamFor(data: PublicTournament, id: string | null) { return data.teams.find((team) => team.id === id); }

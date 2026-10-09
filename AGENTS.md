@@ -13,3 +13,5 @@
 - Treat anonymous organiser URLs and temporary scorer sessions as capability credentials; all writes use validated server functions because public links must remain read-only.
 - Derive tables and player statistics from matches and events instead of storing duplicate totals, so corrections remain consistent.
 - Keep public tournament screens in shared feature components and thin route files, so live updates and navigation stay consistent across detail pages.
+
+- Return typed denial results for expected organiser-link and scorer-PIN rejections; render them inline so rejected credentials never become server runtime exceptions.
