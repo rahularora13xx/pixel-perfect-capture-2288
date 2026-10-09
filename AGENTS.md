@@ -15,3 +15,4 @@
 - Keep public tournament screens in shared feature components and thin route files, so live updates and navigation stay consistent across detail pages.
 
 - Return typed denial results for expected organiser-link and scorer-PIN rejections; render them inline so rejected credentials never become server runtime exceptions.
+- Generate knockout fixtures in a standalone tested helper and represent undecided teams as null, so fixture creation never writes empty UUIDs.
