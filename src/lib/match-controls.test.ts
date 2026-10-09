@@ -1,4 +1,6 @@
-import { describe, expect, test } from "bun:test";
+import { describe, test } from "node:test";
+import assert from "node:assert/strict";
+const expect = (actual: unknown) => ({ toBe: (expected: unknown) => assert.equal(actual, expected), toEqual: (expected: unknown) => assert.deepEqual(actual, expected), toThrow: () => { if (typeof actual !== "function") throw new Error("Expected a function"); assert.throws(actual as () => void); } });
 import { clockPatch, elapsedSeconds, matchMinute, type ClockMatch } from "./match-controls";
 
 const now = Date.parse("2026-10-09T05:20:00Z");
