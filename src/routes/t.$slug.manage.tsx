@@ -22,9 +22,11 @@ function Manage() {
   const [busy, setBusy] = useState(false), [name, setName] = useState(data.tournament.name), [venue, setVenue] = useState(data.tournament.venue), [date, setDate] = useState(data.tournament.start_date), [pin, setPin] = useState("");
   const credentials = { tournamentId: data.tournament.id, token };
   useEffect(() => {
-    setOrigin(window.location.origin); let active = true; setAccess("checking");
-    checkOrganiserAccess({ data: { tournamentId: data.tournament.id, token } }).then(() => {
-      if (!active) return; setAccess("allowed");
+    setOrigin(window.location.origin); let active = true; setAccess("checking"); setError("");
+    checkOrganiserAccess({ data: { tournamentId: data.tournament.id, token } }).then(result => {
+      if (!active) return;
+      if (!result.ok) { setError(result.error); setAccess("denied"); return; }
+      setAccess("allowed");
       rememberTournament({ slug: data.tournament.public_slug, name: data.tournament.name, organiserUrl: window.location.href, openedAt: new Date().toISOString() });
     }).catch(e => { if (active) { setError(e instanceof Error ? e.message : "Invalid organiser link"); setAccess("denied"); } });
     return () => { active = false; };
