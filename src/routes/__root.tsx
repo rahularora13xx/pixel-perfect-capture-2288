@@ -118,6 +118,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // After an update, an open tab may request page files that no longer exist; reload once to fetch fresh ones.
+  useEffect(() => {
+    const KEY = "kickoff:chunk-reload";
+    const recover = (event: Event) => {
+      const last = Number(sessionStorage.getItem(KEY) ?? 0);
+      if (Date.now() - last < 10000) return;
+      event.preventDefault();
+      sessionStorage.setItem(KEY, String(Date.now()));
+      window.location.reload();
+    };
+    const onRejection = (event: PromiseRejectionEvent) => {
+      const message = String((event.reason as Error | undefined)?.message ?? event.reason ?? "");
+      if (/Importing a module script failed|Failed to fetch dynamically imported module|error loading dynamically imported module/i.test(message)) recover(event);
+    };
+    window.addEventListener("vite:preloadError", recover);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => { window.removeEventListener("vite:preloadError", recover); window.removeEventListener("unhandledrejection", onRejection); };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
