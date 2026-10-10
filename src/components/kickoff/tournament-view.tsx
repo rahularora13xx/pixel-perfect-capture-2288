@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "./app-shell";
 import { Button } from "@/components/ui/button";
-import { playerFor, playerStats, rememberTournament, standings, statusLabel, teamFor, type PublicTournament } from "@/lib/kickoff";
+import { playerFor, shareOrigin, playerStats, rememberTournament, standings, statusLabel, teamFor, type PublicTournament } from "@/lib/kickoff";
 import { supabase } from "@/integrations/supabase/client";
 
 export function TournamentView({data,organiserToken}:{data:PublicTournament;organiserToken?:string}){const [tab,setTab]=useState("matches");const t=data.tournament;useEffect(()=>{rememberTournament({slug:t.public_slug,name:t.name,...(organiserToken?{organiserUrl:`${shareOrigin()}/t/${t.public_slug}/manage?token=${encodeURIComponent(organiserToken)}`} : {}),openedAt:new Date().toISOString()})},[t.public_slug,t.name,organiserToken]);useEffect(()=>{const c=supabase.channel(`t-${t.id}`).on("postgres_changes",{event:"*",schema:"public",table:"matches",filter:`tournament_id=eq.${t.id}`},()=>location.reload()).on("postgres_changes",{event:"*",schema:"public",table:"match_events",filter:`tournament_id=eq.${t.id}`},()=>location.reload()).subscribe();return()=>{void supabase.removeChannel(c)}},[t.id]);const tabs=["matches",...(t.format!=="knockout"?["table"]:[]),...(t.format!=="round_robin"?["bracket"]:[]),"stats","teams"];

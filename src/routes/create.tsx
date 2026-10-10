@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { AppShell } from "@/components/kickoff/app-shell";
 import { Button } from "@/components/ui/button";
 import { createTournament } from "@/lib/kickoff.functions";
-import { rememberTournament, type TournamentDraft } from "@/lib/kickoff";
+import { rememberTournament, shareOrigin, type TournamentDraft } from "@/lib/kickoff";
 
 export const Route=createFileRoute("/create")({head:()=>({meta:[{title:"Create tournament — Kickoff"},{name:"description",content:"Set up teams, rules and fixtures for a new football tournament."},{property:"og:title",content:"Create a tournament — Kickoff"},{property:"og:description",content:"Set up teams, rules and fixtures for a new football tournament."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:CreatePage});
 const palette=["#FF5A36","#34D399","#60A5FA","#FBBF24","#F472B6","#A78BFA","#22D3EE","#FB7185","#84CC16","#E879F9"] as const;

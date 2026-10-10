@@ -1,12 +1,12 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ExternalLink, KeyRound, Play, Save, Settings, Shield } from "lucide-react";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { ExternalLink, KeyRound, Play, Save, Settings, Shield, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/kickoff/app-shell";
 import { Button } from "@/components/ui/button";
 import { CopyButton, ExportButton } from "@/components/kickoff/tournament-view";
-import { changeScorerPin, checkOrganiserAccess, getTournament, updateFixture, updateTeam, updateTournamentDetails } from "@/lib/kickoff.functions";
-import { rememberTournament, teamFor } from "@/lib/kickoff";
+import { changeScorerPin, checkOrganiserAccess, deleteTournament, getTournament, updateFixture, updateTeam, updateTournamentDetails } from "@/lib/kickoff.functions";
+import { forgetTournament, rememberTournament, shareOrigin, teamFor } from "@/lib/kickoff";
 
 export const Route = createFileRoute("/t/$slug/manage")({
   validateSearch: (s: Record<string, unknown>) => ({ token: typeof s["token"] === "string" ? s["token"] : "" }),

@@ -1,3 +1,4 @@
+import { shareOrigin } from "@/lib/kickoff";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, CheckCircle2, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
