@@ -22,7 +22,7 @@ function Manage() {
   const [busy, setBusy] = useState(false), [name, setName] = useState(data.tournament.name), [venue, setVenue] = useState(data.tournament.venue), [date, setDate] = useState(data.tournament.start_date), [pin, setPin] = useState("");
   const credentials = { tournamentId: data.tournament.id, token };
   useEffect(() => {
-    setOrigin(window.location.origin); let active = true; setAccess("checking"); setError("");
+    setOrigin(shareOrigin()); let active = true; setAccess("checking"); setError("");
     checkOrganiserAccess({ data: { tournamentId: data.tournament.id, token } }).then(result => {
       if (!active) return;
       if (!result.ok) { setError(result.error); setAccess("denied"); return; }
