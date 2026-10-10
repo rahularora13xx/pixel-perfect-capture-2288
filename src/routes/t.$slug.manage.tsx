@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/kickoff/app-shell";
 import { Button } from "@/components/ui/button";
-import { CopyButton, ExportButton } from "@/components/kickoff/tournament-view";
+import { ExportButton, ShareLinks } from "@/components/kickoff/tournament-view";
 import { changeScorerPin, checkOrganiserAccess, deleteTournament, getTournament, updateFixture, updateTeam, updateTournamentDetails } from "@/lib/kickoff.functions";
-import { forgetTournament, rememberTournament, shareOrigin, teamFor } from "@/lib/kickoff";
+import { forgetTournament, rememberTournament, teamFor } from "@/lib/kickoff";
 
 export const Route = createFileRoute("/t/$slug/manage")({
   validateSearch: (s: Record<string, unknown>) => ({ token: typeof s["token"] === "string" ? s["token"] : "" }),
@@ -18,11 +18,11 @@ type Data = Awaited<ReturnType<typeof getTournament>>;
 function Manage() {
   const data = Route.useLoaderData(), { token } = Route.useSearch(), router = useRouter(), navigate = useNavigate();
   const [access, setAccess] = useState<"checking" | "allowed" | "denied">("checking");
-  const [error, setError] = useState(""), [section, setSection] = useState("fixtures"), [origin, setOrigin] = useState("");
+  const [error, setError] = useState(""), [section, setSection] = useState("fixtures");
   const [busy, setBusy] = useState(false), [name, setName] = useState(data.tournament.name), [venue, setVenue] = useState(data.tournament.venue), [date, setDate] = useState(data.tournament.start_date), [pin, setPin] = useState("");
   const credentials = { tournamentId: data.tournament.id, token };
   useEffect(() => {
-    setOrigin(shareOrigin()); let active = true; setAccess("checking"); setError("");
+    let active = true; setAccess("checking"); setError("");
     checkOrganiserAccess({ data: { tournamentId: data.tournament.id, token } }).then(result => {
       if (!active) return;
       if (!result.ok) { setError(result.error); setAccess("denied"); return; }
@@ -32,18 +32,18 @@ function Manage() {
     return () => { active = false; };
   }, [data.tournament.id, token]);
   const save = async (action: () => Promise<unknown>, message: string) => { setBusy(true); try { await action(); await router.invalidate(); toast.success(message); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not save"); } finally { setBusy(false); } };
-  const publicUrl = `${origin}/t/${data.tournament.public_slug}`, organiserUrl = `${publicUrl}/manage?token=${encodeURIComponent(token)}`;
   return <AppShell><main className="mx-auto max-w-3xl px-4 py-8">
     <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-xs font-black uppercase text-primary"><Shield className="size-4" />Organiser access</p><h1 className="mt-2 text-3xl font-black">{data.tournament.name}</h1></div><Button variant="outline" asChild><Link to="/t/$slug" params={{ slug: data.tournament.public_slug }}>View public<ExternalLink /></Link></Button></div>
     {access === "checking" && <p className="py-8 text-muted-foreground">Checking organiser link…</p>}
     {access === "denied" && <p role="alert" className="py-8 text-destructive">{error}</p>}
     {access === "allowed" && <>
+      <ShareLinks className="mt-6" slug={data.tournament.public_slug} organiserToken={token} />
       <nav className="my-6 flex flex-wrap gap-2">{[["teams", "Edit teams"], ["fixtures", "Edit fixtures"], ["settings", "Edit details"], ["pin", "Change PIN"]].map(([id, label]) => <Button key={id} variant={section === id ? "default" : "outline"} onClick={() => setSection(id ?? "fixtures")}><Settings />{label}</Button>)}</nav>
       {section === "teams" && <section><h2 className="mb-4 text-xl font-black">Teams & squads</h2><div className="space-y-6">{data.teams.map(team => <TeamEditor key={team.id} team={team} players={data.players.filter(p => p.team_id === team.id)} onSave={payload => save(() => updateTeam({ data: { ...payload, ...credentials } }), "Team saved")} busy={busy} />)}</div></section>}
       {section === "fixtures" && <section><h2 className="mb-4 text-xl font-black">Fixtures</h2><div className="space-y-6">{data.matches.map(match => <FixtureEditor key={`${match.id}:${match.scheduled_at}:${match.pitch}:${match.status}`} match={match} data={data} token={token} busy={busy} onSave={payload => save(() => updateFixture({ data: { ...credentials, ...payload } }), "Fixture saved")} />)}</div></section>}
       {section === "settings" && <form className="grid gap-4" onSubmit={e => { e.preventDefault(); void save(() => updateTournamentDetails({ data: { ...credentials, name, venue, startDate: date } }), "Tournament details saved"); }}><h2 className="text-xl font-black">Tournament settings</h2><label className="field"><span>Name</span><input value={name} onChange={e => setName(e.target.value)} required minLength={2} maxLength={80} /></label><label className="field"><span>Venue</span><input value={venue} onChange={e => setVenue(e.target.value)} required minLength={2} maxLength={120} /></label><label className="field"><span>Start date</span><input type="date" value={date} onChange={e => setDate(e.target.value)} required /></label><p className="text-sm text-muted-foreground">{data.tournament.team_size}v{data.tournament.team_size} · {data.tournament.half_minutes}-minute halves · {data.tournament.max_subs} substitutions</p><Button type="submit" disabled={busy}><Save />Save details</Button></form>}
       {section === "pin" && <form className="grid max-w-sm gap-4" onSubmit={e => { e.preventDefault(); void save(() => changeScorerPin({ data: { ...credentials, pin } }).then(result => { setPin(""); return result; }), "Scorer PIN changed"); }}><h2 className="text-xl font-black">Scorer PIN</h2><label className="field"><span>New four-digit PIN</span><input type="password" inputMode="numeric" maxLength={4} pattern="[0-9]{4}" required value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ""))} /></label><p className="text-sm text-muted-foreground">Existing scorers will need to unlock scoring again.</p><Button type="submit" disabled={busy || pin.length !== 4}><KeyRound />Change PIN</Button></form>}
-      <section className="mt-10 border-t border-border pt-6"><h2 className="font-black">Sharing & export</h2><div className="mt-4 flex flex-wrap gap-2"><CopyButton text={publicUrl} label="Public link" /><CopyButton text={organiserUrl} label="Organiser link" /><ExportButton data={data} /></div></section>
+      <section className="mt-10 border-t border-border pt-6"><h2 className="font-black">Export</h2><div className="mt-4 flex flex-wrap gap-2"><ExportButton data={data} /></div></section>
       <section className="mt-10 rounded-lg border border-destructive/40 p-4"><h2 className="font-black text-destructive">Delete tournament</h2><p className="mt-1 text-sm text-muted-foreground">Removes all teams, fixtures, results and stats for everyone. This cannot be undone.</p><Button className="mt-3" variant="destructive" disabled={busy} onClick={async () => { if (!window.confirm(`Delete "${data.tournament.name}" permanently? This cannot be undone.`)) return; setBusy(true); try { const r = await deleteTournament({ data: credentials }); if (!r.ok) { toast.error(r.error); return; } forgetTournament(data.tournament.public_slug); toast.success("Tournament deleted"); void navigate({ to: "/" }); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not delete"); } finally { setBusy(false); } }}><Trash2 />Delete tournament</Button></section>
     </>}
   </main></AppShell>;
