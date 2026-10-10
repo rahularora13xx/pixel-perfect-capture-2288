@@ -49,3 +49,14 @@ export function playerStats(data: PublicTournament) {
     return { player, goals:events.filter((e)=>e.event_type==="goal").length, assists, yellow:events.filter((e)=>e.event_type==="yellow"||e.event_type==="second_yellow").length, red:events.filter((e)=>e.event_type==="red"||e.event_type==="second_yellow").length, potm:data.matches.filter((m)=>m.player_of_match_id===player.id).length };
   });
 }
+export const PUBLISHED_ORIGIN = "https://kickoffscorer.lovable.app";
+/** Preview hosts need a Lovable login, so shared links always point at the published app from there. */
+export function shareOrigin() {
+  if (typeof window === "undefined") return PUBLISHED_ORIGIN;
+  const host = window.location.hostname;
+  return host.includes("id-preview--") || host.endsWith("lovableproject.com") || host === "localhost" ? PUBLISHED_ORIGIN : window.location.origin;
+}
+export function forgetTournament(slug: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(KEY, JSON.stringify(getRemembered().filter(x => x.slug !== slug)));
+}

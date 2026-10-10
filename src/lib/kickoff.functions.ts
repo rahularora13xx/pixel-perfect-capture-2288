@@ -114,3 +114,7 @@ export const changeScorerPin=createServerFn({method:"POST"}).inputValidator((d)=
   const {error}=await supabaseAdmin.from("tournament_secrets").update({scorer_pin_hash:hash(`${data.pin}:${data.tournamentId}`)}).eq("tournament_id",data.tournamentId);if(error)throw new Error(error.message);
   const {error:sessionError}=await supabaseAdmin.from("scorer_sessions").delete().eq("tournament_id",data.tournamentId);if(sessionError)throw new Error(sessionError.message);return {ok:true};
 });
+export const deleteTournament=createServerFn({method:"POST"}).inputValidator((d)=>organiserSchema.parse(d)).handler(async({data})=>{
+  const {supabaseAdmin}=await import("@/integrations/supabase/client.server");if(!await verifyCredential(data.tournamentId,data.token,"organiser",supabaseAdmin))return {ok:false as const,error:"Invalid organiser access"};
+  const {error}=await supabaseAdmin.from("tournaments").delete().eq("id",data.tournamentId);if(error)throw new Error(error.message);return {ok:true as const};
+});
