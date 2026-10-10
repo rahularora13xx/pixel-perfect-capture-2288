@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { clockPatch } from "./match-controls";
 import { knockoutFixtures, type Fixture } from "./knockout-fixtures";
@@ -40,7 +40,7 @@ export const createTournament=createServerFn({method:"POST"}).inputValidator((d)
   const bySeed=new Map((teams??[]).map(team=>[team.seed,team.id]));const playerRows=data.teams.flatMap((team,i)=>team.players.map(player=>({tournament_id:t.id,team_id:bySeed.get(i+1)??"",name:player.name,jersey_number:player.jerseyNumber,position:player.position,is_captain:player.isCaptain})));const {error:playerError}=await supabaseAdmin.from("players").insert(playerRows);if(playerError)throw new Error(playerError.message);
   const sorted=(teams??[]).sort((a,b)=>a.seed-b.seed),ids=sorted.map(team=>team.id),base=new Date(`${data.startDate}T09:00:00Z`);let fixtures:Fixture[]=[];
   if(data.format==="knockout")fixtures=knockoutFixtures(t.id,ids,base);
-  else {const groups=data.format==="hybrid"&&data.groupCount===2?[sorted.filter(t=>t.group_name==="Group A"),sorted.filter(t=>t.group_name==="Group B")]:[sorted];let index=0;for(const group of groups){for(const [home,away,round] of rounds(group.map(t=>t.id),data.roundRobinLegs)){fixtures.push({tournament_id:t.id,home_team_id:home,away_team_id:away,round_number:round,round_label:groups.length===2?`${group[0]?.group_name} · Matchday ${round}`:`Matchday ${round}`,stage:groups.length===2?"group":"league",scheduled_at:new Date(base.getTime()+index++*3600000).toISOString(),pitch:`Pitch ${(index%2)+1}`});}}if(data.format==="hybrid")fixtures.push(...knockoutFixtures(t.id,Array.from({length:data.advanceCount},()=>null),base,index+2));}
+  else {const groups=data.format==="hybrid"&&data.groupCount===2?[sorted.filter(t=>t.group_name==="Group A"),sorted.filter(t=>t.group_name==="Group B")]:[sorted];let index=0;for(const group of groups){for(const [home,away,round] of rounds(group.map(t=>t.id),data.roundRobinLegs)){fixtures.push({id:randomUUID(),tournament_id:t.id,home_team_id:home,away_team_id:away,round_number:round,round_label:groups.length===2?`${group[0]?.group_name} · Matchday ${round}`:`Matchday ${round}`,stage:groups.length===2?"group":"league",scheduled_at:new Date(base.getTime()+index++*3600000).toISOString(),pitch:`Pitch ${(index%2)+1}`});}}if(data.format==="hybrid")fixtures.push(...knockoutFixtures(t.id,Array.from({length:data.advanceCount},()=>null),base,index+2));}
   if(fixtures.length){const {error:matchError}=await supabaseAdmin.from("matches").insert(fixtures);if(matchError)throw new Error(matchError.message)}return {slug:t.public_slug,name:t.name,token};
 });
 
