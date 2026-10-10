@@ -228,3 +228,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+
+/* Lineup pitch */
+.pitch { --pitch-a: oklch(0.52 0.13 140); --pitch-b: oklch(0.47 0.12 140); --pitch-line: oklch(0.97 0 0 / 0.8);
+  position: relative; aspect-ratio: 3 / 4; max-width: 520px; margin-inline: auto; border-radius: 0.75rem; overflow: hidden;
+  background: repeating-linear-gradient(to bottom, var(--pitch-a) 0 10%, var(--pitch-b) 10% 20%); outline: 2px solid var(--pitch-line); outline-offset: -12px; }
+.pitch-label { position: absolute; top: 18px; left: 22px; z-index: 20; font-size: .75rem; font-weight: 800; color: var(--pitch-line); text-transform: uppercase; letter-spacing: .05em; }
+.pitch-centre { position: absolute; left: 12px; right: 12px; top: 50%; border-top: 2px solid var(--pitch-line); }
+.pitch-centre::after { content: ""; position: absolute; left: 50%; top: 0; width: 26%; aspect-ratio: 1; border: 2px solid var(--pitch-line); border-radius: 9999px; transform: translate(-50%, -50%); }
+.pitch-box { position: absolute; left: 25%; right: 25%; height: 14%; border: 2px solid var(--pitch-line); }
+.pitch-box.top { top: 12px; border-top: 0; } .pitch-box.bottom { bottom: 12px; border-bottom: 0; }
+.pitch-player { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 64px; }
+.pitch-shirt { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px 10px 6px 6px; border: 2px solid var(--pitch-line); font-weight: 900; color: oklch(0.15 0 0); box-shadow: 0 4px 10px oklch(0 0 0 / .3); }
+.pitch-name { max-width: 90px; text-align: center; font-size: .7rem; font-weight: 800; line-height: 1.1; color: oklch(0.99 0 0); text-shadow: 0 1px 2px oklch(0 0 0 / .7); }
