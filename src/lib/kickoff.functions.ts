@@ -27,7 +27,9 @@ export const getTournament=createServerFn({method:"GET"}).inputValidator((d)=>z.
     db.from("shootout_kicks").select("id,match_id,team_id,player_id,kick_order,result").eq("tournament_id",t.id).order("kick_order")
   ]);
   for(const result of [teams,players,matches,events,lineups,kicks])if(result.error)throw new Error(result.error.message);
-  return {tournament:t,teams:teams.data??[],players:players.data??[],matches:matches.data??[],events:events.data??[],lineups:lineups.data??[],kicks:kicks.data??[]};
+  // Read separately and tolerate failure so pages still load before the added-time migration is applied.
+  const added=await db.from("matches").select("id,first_half_added_minutes,second_half_added_minutes").eq("tournament_id",t.id);const addedById=new Map((added.data??[]).map(m=>[m.id,m]));
+  return {tournament:t,teams:teams.data??[],players:players.data??[],matches:(matches.data??[]).map(m=>({...m,first_half_added_minutes:addedById.get(m.id)?.first_half_added_minutes??0,second_half_added_minutes:addedById.get(m.id)?.second_half_added_minutes??0})),events:events.data??[],lineups:lineups.data??[],kicks:kicks.data??[]};
 });
 
 function rounds(ids:string[],legs:number){const rotating=[...ids];if(rotating.length%2)rotating.push("");const out:Array<[string,string,number]>=[];for(let round=0;round<rotating.length-1;round++){for(let i=0;i<rotating.length/2;i++){const a=rotating[i],b=rotating[rotating.length-1-i];if(a&&b)out.push(round%2?[b,a,round+1]:[a,b,round+1]);}rotating.splice(1,0,rotating.pop()??"");}if(legs===2){const first=[...out];first.forEach(([a,b,r])=>out.push([b,a,r+rotating.length-1]));}return out;}
@@ -49,7 +51,28 @@ export const unlockScoring=createServerFn({method:"POST"}).inputValidator((d)=>z
 const credentialSchema=z.object({matchId:z.string().uuid(),credential:z.string().min(16).max(200),kind:z.enum(["organiser","session"])});
 const scoreSchema=credentialSchema.extend({teamId:z.string().uuid(),playerId:z.string().uuid().nullable(),relatedPlayerId:z.string().uuid().nullable().optional(),eventType:z.enum(["goal","own_goal","yellow","red","second_yellow","substitution"]),minute:z.number().int().min(0).max(180),isPenalty:z.boolean().optional()});
 export const addMatchEvent=createServerFn({method:"POST"}).inputValidator((d)=>scoreSchema.parse(d)).handler(async({data})=>{const {supabaseAdmin}=await import("@/integrations/supabase/client.server");const {data:match}=await supabaseAdmin.from("matches").select("tournament_id,home_team_id,away_team_id,home_score,away_score").eq("id",data.matchId).single();if(!match)throw new Error("Match not found");if(data.teamId!==match.home_team_id&&data.teamId!==match.away_team_id)throw new Error("That team is not in this match");if(!await verifyCredential(match.tournament_id,data.credential,data.kind,supabaseAdmin))throw new Error("Scoring access expired or invalid");if(data.playerId){const {data:player}=await supabaseAdmin.from("players").select("id").eq("id",data.playerId).eq("team_id",data.teamId).eq("tournament_id",match.tournament_id).maybeSingle();if(!player)throw new Error("Choose a player from this team");}if(data.relatedPlayerId&&data.eventType==="goal"){if(data.relatedPlayerId===data.playerId)throw new Error("The assist must come from a different player");const {data:assister}=await supabaseAdmin.from("players").select("id").eq("id",data.relatedPlayerId).eq("team_id",data.teamId).eq("tournament_id",match.tournament_id).maybeSingle();if(!assister)throw new Error("Choose an assist from the scoring team");}let eventType=data.eventType;if(eventType==="yellow"&&data.playerId){const {count}=await supabaseAdmin.from("match_events").select("id",{count:"exact",head:true}).eq("match_id",data.matchId).eq("player_id",data.playerId).in("event_type",["yellow","second_yellow"]);if((count??0)>0)eventType="second_yellow";}const {error}=await supabaseAdmin.from("match_events").insert({tournament_id:match.tournament_id,match_id:data.matchId,team_id:data.teamId,player_id:data.playerId,related_player_id:data.relatedPlayerId??null,event_type:eventType,minute:data.minute,is_penalty:data.isPenalty??false});if(error)throw new Error(error.message);if(eventType==="goal"||eventType==="own_goal"){const teamIsHome=data.teamId===match.home_team_id;const homeScores=eventType==="own_goal"?!teamIsHome:teamIsHome;const {error:updateError}=await supabaseAdmin.from("matches").update(homeScores?{home_score:match.home_score+1}:{away_score:match.away_score+1}).eq("id",data.matchId);if(updateError)throw new Error(updateError.message)}return {ok:true};});
-export const controlMatch=createServerFn({method:"POST"}).inputValidator((d)=>credentialSchema.extend({action:z.enum(["start_first","half_time","start_second","pause","resume","full_time","undo","correct_clock"]),elapsedSeconds:z.number().int().min(0).max(10800).optional()}).parse(d)).handler(async({data})=>{
+/** Corrects or removes a logged event; scores are recounted from the remaining goals so they never drift. */
+export const editMatchEvent=createServerFn({method:"POST"}).inputValidator((d)=>credentialSchema.extend({eventId:z.string().uuid(),remove:z.boolean().optional(),teamId:z.string().uuid(),playerId:z.string().uuid(),relatedPlayerId:z.string().uuid().nullable().optional(),eventType:z.enum(["goal","own_goal","yellow","red"]),minute:z.number().int().min(0).max(180)}).parse(d)).handler(async({data})=>{
+  const {supabaseAdmin}=await import("@/integrations/supabase/client.server");
+  const {data:match}=await supabaseAdmin.from("matches").select("id,tournament_id,home_team_id,away_team_id").eq("id",data.matchId).single();if(!match)throw new Error("Match not found");
+  if(!await verifyCredential(match.tournament_id,data.credential,data.kind,supabaseAdmin))throw new Error("Scoring access expired or invalid");
+  const {data:event}=await supabaseAdmin.from("match_events").select("id,event_type").eq("id",data.eventId).eq("match_id",data.matchId).maybeSingle();if(!event)throw new Error("Event not found. Refresh and try again.");
+  if(data.remove){const {error}=await supabaseAdmin.from("match_events").delete().eq("id",event.id);if(error)throw new Error(error.message);}
+  else{
+    if(data.teamId!==match.home_team_id&&data.teamId!==match.away_team_id)throw new Error("That team is not in this match");
+    const assistId=data.eventType==="goal"?data.relatedPlayerId??null:null;
+    if(assistId===data.playerId)throw new Error("The assist must come from a different player");
+    const ids=[data.playerId,...(assistId?[assistId]:[])];
+    const {data:found}=await supabaseAdmin.from("players").select("id").eq("team_id",data.teamId).eq("tournament_id",match.tournament_id).in("id",ids);if(found?.length!==ids.length)throw new Error("Choose players from this team");
+    const eventType=data.eventType==="yellow"&&event.event_type==="second_yellow"?"second_yellow":data.eventType;
+    const {error}=await supabaseAdmin.from("match_events").update({team_id:data.teamId,player_id:data.playerId,related_player_id:assistId,event_type:eventType,minute:data.minute}).eq("id",event.id);if(error)throw new Error(error.message);
+  }
+  const {data:goals,error:goalError}=await supabaseAdmin.from("match_events").select("team_id,event_type").eq("match_id",data.matchId).in("event_type",["goal","own_goal"]);if(goalError)throw new Error(goalError.message);
+  let home=0,away=0;for(const e of goals??[]){if((e.team_id===match.home_team_id)===(e.event_type==="goal"))home++;else away++;}
+  const {error:updateError}=await supabaseAdmin.from("matches").update({home_score:home,away_score:away}).eq("id",match.id);if(updateError)throw new Error(updateError.message);
+  return {ok:true};
+});
+export const controlMatch=createServerFn({method:"POST"}).inputValidator((d)=>credentialSchema.extend({action:z.enum(["start_first","half_time","start_second","pause","resume","full_time","undo","correct_clock","set_added_time"]),elapsedSeconds:z.number().int().min(0).max(10800).optional(),addedMinutes:z.number().int().min(0).max(30).optional()}).parse(d)).handler(async({data})=>{
   const {supabaseAdmin}=await import("@/integrations/supabase/client.server");
   const {data:match,error:readError}=await supabaseAdmin.from("matches").select("*").eq("id",data.matchId).single();
   if(readError||!match)throw new Error("Match not found");
@@ -62,6 +85,13 @@ export const controlMatch=createServerFn({method:"POST"}).inputValidator((d)=>cr
     const {data:goals,error:goalError}=await supabaseAdmin.from("match_events").select("team_id,event_type").eq("match_id",data.matchId).in("event_type",["goal","own_goal"]);if(goalError)throw new Error(goalError.message);
     let home=0,away=0;for(const e of goals??[]){if((e.team_id===match.home_team_id)===(e.event_type==="goal"))home++;else away++;}
     const {error:updateError}=await supabaseAdmin.from("matches").update({home_score:home,away_score:away}).eq("id",match.id);if(updateError)throw new Error(updateError.message);
+    return {ok:true};
+  }
+  if(data.action==="set_added_time"){
+    if(match.status!=="first_half"&&match.status!=="second_half")throw new Error("Added time can only be set while a half is being played.");
+    if(data.addedMinutes===undefined)throw new Error("Enter the added minutes");
+    const {error}=await supabaseAdmin.from("matches").update(match.status==="first_half"?{first_half_added_minutes:data.addedMinutes}:{second_half_added_minutes:data.addedMinutes}).eq("id",match.id);
+    if(error)throw new Error(/added_minutes/.test(error.message)?"Added time needs a database update that has not been applied yet.":error.message);
     return {ok:true};
   }
   if(!match.home_team_id||!match.away_team_id)throw new Error("Both teams must be assigned before starting this match.");

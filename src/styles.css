@@ -209,6 +209,7 @@
   .score-hero { border-bottom:1px solid var(--border); padding:1rem 0 2rem; }
   .scoring-panel { margin-top:1rem; padding:1rem; }
   .timeline-row { display:grid; grid-template-columns:1fr 2.5rem 3rem; align-items:center; border-top:1px solid var(--border); padding:.8rem 0; }
+  .timeline-row.away { grid-template-columns:3rem 2.5rem 1fr; }
   .timeline-row.away > div { grid-column:3; text-align:right; }
   .timeline-row.away .event-icon { grid-column:2; grid-row:1; }
   .timeline-row.away > strong { grid-column:1; grid-row:1; }

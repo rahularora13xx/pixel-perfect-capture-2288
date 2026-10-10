@@ -29,3 +29,17 @@ export function matchMinute(match: ClockMatch, halfMinutes: number, now = Date.n
   const end = match.status === "first_half" || match.status === "half_time" ? halfMinutes : halfMinutes * 2;
   return minute > end ? `${end}+${minute - end}` : String(minute);
 }
+/** Live clock as MM:SS; time past the end of a half shows as stoppage, e.g. "20:00 +1:23". */
+export function matchClock(match: ClockMatch, halfMinutes: number, now = Date.now()) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const seconds = elapsedSeconds(match, now);
+  const end = (match.status === "first_half" || match.status === "half_time" ? halfMinutes : halfMinutes * 2) * 60;
+  if (match.status === "scheduled" || seconds <= end) return `${pad(Math.floor(seconds / 60))}:${pad(seconds % 60)}`;
+  const extra = seconds - end;
+  return `${pad(end / 60)}:00 +${Math.floor(extra / 60)}:${pad(extra % 60)}`;
+}
+
+/** Added minutes the scorer announced for the half being played, or 0 outside a live half. */
+export function announcedAddedMinutes(match: { status: string; first_half_added_minutes: number; second_half_added_minutes: number }) {
+  return match.status === "first_half" ? match.first_half_added_minutes : match.status === "second_half" ? match.second_half_added_minutes : 0;
+}

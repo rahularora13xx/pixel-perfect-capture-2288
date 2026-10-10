@@ -161,6 +161,8 @@ export type Database = {
           away_team_id: string | null
           clock_elapsed_seconds: number
           clock_running: boolean
+          first_half_added_minutes: number
+          second_half_added_minutes: number
           clock_started_at: string | null
           created_at: string
           home_penalties: number
@@ -186,6 +188,8 @@ export type Database = {
           away_team_id?: string | null
           clock_elapsed_seconds?: number
           clock_running?: boolean
+          first_half_added_minutes?: number
+          second_half_added_minutes?: number
           clock_started_at?: string | null
           created_at?: string
           home_penalties?: number
@@ -211,6 +215,8 @@ export type Database = {
           away_team_id?: string | null
           clock_elapsed_seconds?: number
           clock_running?: boolean
+          first_half_added_minutes?: number
+          second_half_added_minutes?: number
           clock_started_at?: string | null
           created_at?: string
           home_penalties?: number
