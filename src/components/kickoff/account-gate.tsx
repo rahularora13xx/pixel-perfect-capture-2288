@@ -11,7 +11,7 @@ export function AccountLink() {
   const account = useAccount();
   if (account.status === "loading") return null;
   if (account.status === "ready") return <Link to="/me" className="flex items-center gap-2 text-sm font-bold text-foreground"><UserRound className="size-4 text-primary" />{account.profile.display_name}</Link>;
-  return <Link to="/login" search={{ next: "/me" }} className="flex items-center gap-2 text-sm font-bold text-primary"><LogIn className="size-4" />Sign in</Link>;
+  return <Link to="/login" search={{ next: "/me" }} className="flex items-center gap-2 text-sm font-bold text-primary"><LogIn className="size-4" />{account.status === "needs_profile" ? "Finish profile" : "Sign in"}</Link>;
 }
 
 /** Shows its children only to a signed-in user with a finished profile; everyone else gets a sign-in prompt that returns here. */
