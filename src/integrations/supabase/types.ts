@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_members: {
+        Row: {
+          club_id: string
+          created_at: string
+          guest_name: string | null
+          id: string
+          is_captain: boolean
+          jersey_number: number
+          position: string
+          profile_id: string | null
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          is_captain?: boolean
+          jersey_number: number
+          position?: string
+          profile_id?: string | null
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          is_captain?: boolean
+          jersey_number?: number
+          position?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clubs: {
+        Row: {
+          created_at: string
+          id: string
+          kit_color: string
+          name: string
+          owner_id: string
+          short_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kit_color: string
+          name: string
+          owner_id: string
+          short_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kit_color?: string
+          name?: string
+          owner_id?: string
+          short_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clubs_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friendships_addressee_id_fkey"
+            columns: ["addressee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friendships_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lineups: {
         Row: {
           id: string
@@ -163,6 +288,7 @@ export type Database = {
           clock_running: boolean
           clock_started_at: string | null
           created_at: string
+          first_half_added_minutes: number
           home_penalties: number
           home_score: number
           home_team_id: string | null
@@ -174,6 +300,7 @@ export type Database = {
           round_label: string
           round_number: number
           scheduled_at: string
+          second_half_added_minutes: number
           stage: string
           status: string
           tournament_id: string
@@ -188,6 +315,7 @@ export type Database = {
           clock_running?: boolean
           clock_started_at?: string | null
           created_at?: string
+          first_half_added_minutes?: number
           home_penalties?: number
           home_score?: number
           home_team_id?: string | null
@@ -199,6 +327,7 @@ export type Database = {
           round_label?: string
           round_number?: number
           scheduled_at: string
+          second_half_added_minutes?: number
           stage?: string
           status?: string
           tournament_id: string
@@ -213,6 +342,7 @@ export type Database = {
           clock_running?: boolean
           clock_started_at?: string | null
           created_at?: string
+          first_half_added_minutes?: number
           home_penalties?: number
           home_score?: number
           home_team_id?: string | null
@@ -224,6 +354,7 @@ export type Database = {
           round_label?: string
           round_number?: number
           scheduled_at?: string
+          second_half_added_minutes?: number
           stage?: string
           status?: string
           tournament_id?: string
@@ -309,36 +440,56 @@ export type Database = {
       }
       players: {
         Row: {
+          club_member_id: string | null
           created_at: string
           id: string
           is_captain: boolean
           jersey_number: number
           name: string
           position: string
+          profile_id: string | null
           team_id: string
           tournament_id: string
         }
         Insert: {
+          club_member_id?: string | null
           created_at?: string
           id?: string
           is_captain?: boolean
           jersey_number: number
           name: string
           position: string
+          profile_id?: string | null
           team_id: string
           tournament_id: string
         }
         Update: {
+          club_member_id?: string | null
           created_at?: string
           id?: string
           is_captain?: boolean
           jersey_number?: number
           name?: string
           position?: string
+          profile_id?: string | null
           team_id?: string
           tournament_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "players_club_member_id_fkey"
+            columns: ["club_member_id"]
+            isOneToOne: false
+            referencedRelation: "club_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "players_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "players_team_id_fkey"
             columns: ["team_id"]
@@ -354,6 +505,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          jersey_number: number | null
+          position: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id: string
+          jersey_number?: number | null
+          position?: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          jersey_number?: number | null
+          position?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
       }
       scorer_sessions: {
         Row: {
@@ -451,6 +632,7 @@ export type Database = {
       }
       teams: {
         Row: {
+          club_id: string | null
           created_at: string
           group_name: string | null
           id: string
@@ -461,6 +643,7 @@ export type Database = {
           tournament_id: string
         }
         Insert: {
+          club_id?: string | null
           created_at?: string
           group_name?: string | null
           id?: string
@@ -471,6 +654,7 @@ export type Database = {
           tournament_id: string
         }
         Update: {
+          club_id?: string | null
           created_at?: string
           group_name?: string | null
           id?: string
@@ -481,6 +665,13 @@ export type Database = {
           tournament_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "teams_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "teams_tournament_id_fkey"
             columns: ["tournament_id"]
@@ -531,6 +722,7 @@ export type Database = {
           id: string
           max_subs: number
           name: string
+          owner_id: string | null
           penalties_enabled: boolean
           public_slug: string
           round_robin_legs: number
@@ -551,6 +743,7 @@ export type Database = {
           id?: string
           max_subs: number
           name: string
+          owner_id?: string | null
           penalties_enabled?: boolean
           public_slug?: string
           round_robin_legs?: number
@@ -571,6 +764,7 @@ export type Database = {
           id?: string
           max_subs?: number
           name?: string
+          owner_id?: string | null
           penalties_enabled?: boolean
           public_slug?: string
           round_robin_legs?: number
@@ -587,7 +781,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      are_friends: { Args: { a: string; b: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

@@ -30,7 +30,7 @@ function SignIn({ next }: { next: string }) {
     <p className="text-xs font-black uppercase tracking-widest text-primary">Your account</p>
     <h1 className="mt-1 text-3xl font-black">Sign in</h1>
     <p className="mt-3 text-muted-foreground">One profile for your teams, friends and career stats. No password needed.</p>
-    <Button size="lg" variant="outline" className="mt-6 w-full" disabled={busy} onClick={() => attempt(() => signInWithGoogle(next))}>Continue with Google</Button>
+    <Button size="lg" variant="outline" className="mt-6 w-full" disabled={busy} onClick={() => attempt(() => signInWithGoogle())}>Continue with Google</Button>
     <p className="my-4 text-center text-xs font-bold uppercase text-muted-foreground">or</p>
     <form className="grid gap-3" onSubmit={e => { e.preventDefault(); void attempt(() => signInWithEmail(email, next), () => setSent(true)); }}>
       <label className="field"><span>Email</span><input required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" /></label>
