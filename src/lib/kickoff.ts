@@ -4,7 +4,9 @@ export type TournamentDraft = {
   extraTimeEnabled: boolean; extraTimeHalfMinutes: number; penaltiesEnabled: boolean;
   format: "round_robin" | "knockout" | "hybrid"; roundRobinLegs: 1 | 2;
   seeding: "random" | "manual"; groupCount: 1 | 2; advanceCount: 2 | 4;
-  teams: Array<{ name: string; shortName: string; kitColor: string; players: Array<{ name: string; jerseyNumber: number; position: "GK" | "DEF" | "MID" | "FWD"; isCaptain: boolean }> }>;
+  /** Kick-off of the first fixture; used by one-off matches, which start at a chosen time rather than 09:00. */
+  kickoffAt?: string;
+  teams: Array<{ name: string; shortName: string; kitColor: string; clubId?: string | null; players: Array<{ name: string; jerseyNumber: number; position: "GK" | "DEF" | "MID" | "FWD"; isCaptain: boolean; profileId?: string | null; clubMemberId?: string | null }> }>;
 };
 
 export type PublicTournament = {
@@ -29,6 +31,8 @@ export function rememberTournament(item: RememberedTournament) {
   const next = [retained, ...getRemembered().filter((x) => x.slug !== item.slug)].slice(0, 12);
   localStorage.setItem(KEY, JSON.stringify(next));
 }
+/** A one-off match is stored as a two-team, single-fixture tournament. */
+export function isSingleMatch(data: { teams: unknown[]; matches: unknown[] }) { return data.teams.length === 2 && data.matches.length === 1; }
 export function teamFor(data: PublicTournament, id: string | null) { return data.teams.find((team) => team.id === id); }
 export function playerFor(data: PublicTournament, id: string | null) { return data.players.find((player) => player.id === id); }
 export function statusLabel(status: string) {

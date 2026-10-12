@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_members: {
+        Row: {
+          club_id: string
+          created_at: string
+          guest_name: string | null
+          id: string
+          is_captain: boolean
+          jersey_number: number
+          position: string
+          profile_id: string | null
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          is_captain?: boolean
+          jersey_number: number
+          position?: string
+          profile_id?: string | null
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          is_captain?: boolean
+          jersey_number?: number
+          position?: string
+          profile_id?: string | null
+        }
+        Relationships: []
+      }
+      clubs: {
+        Row: {
+          created_at: string
+          id: string
+          kit_color: string
+          name: string
+          owner_id: string
+          short_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kit_color: string
+          name: string
+          owner_id: string
+          short_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kit_color?: string
+          name?: string
+          owner_id?: string
+          short_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       lineups: {
         Row: {
           id: string
@@ -315,6 +402,8 @@ export type Database = {
       }
       players: {
         Row: {
+          club_member_id: string | null
+          profile_id: string | null
           created_at: string
           id: string
           is_captain: boolean
@@ -325,6 +414,8 @@ export type Database = {
           tournament_id: string
         }
         Insert: {
+          club_member_id?: string | null
+          profile_id?: string | null
           created_at?: string
           id?: string
           is_captain?: boolean
@@ -335,6 +426,8 @@ export type Database = {
           tournament_id: string
         }
         Update: {
+          club_member_id?: string | null
+          profile_id?: string | null
           created_at?: string
           id?: string
           is_captain?: boolean
@@ -360,6 +453,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          jersey_number: number | null
+          position: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id: string
+          jersey_number?: number | null
+          position?: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          jersey_number?: number | null
+          position?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
       }
       scorer_sessions: {
         Row: {
@@ -457,6 +580,7 @@ export type Database = {
       }
       teams: {
         Row: {
+          club_id: string | null
           created_at: string
           group_name: string | null
           id: string
@@ -467,6 +591,7 @@ export type Database = {
           tournament_id: string
         }
         Insert: {
+          club_id?: string | null
           created_at?: string
           group_name?: string | null
           id?: string
@@ -477,6 +602,7 @@ export type Database = {
           tournament_id: string
         }
         Update: {
+          club_id?: string | null
           created_at?: string
           group_name?: string | null
           id?: string
@@ -527,6 +653,7 @@ export type Database = {
       }
       tournaments: {
         Row: {
+          owner_id: string | null
           advance_count: number
           created_at: string
           extra_time_enabled: boolean
@@ -547,6 +674,7 @@ export type Database = {
           venue: string
         }
         Insert: {
+          owner_id?: string | null
           advance_count?: number
           created_at?: string
           extra_time_enabled?: boolean
@@ -567,6 +695,7 @@ export type Database = {
           venue: string
         }
         Update: {
+          owner_id?: string | null
           advance_count?: number
           created_at?: string
           extra_time_enabled?: boolean
@@ -593,7 +722,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      are_friends: { Args: { a: string; b: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

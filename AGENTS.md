@@ -16,3 +16,5 @@
 
 - Return typed denial results for expected organiser-link and scorer-PIN rejections; render them inline so rejected credentials never become server runtime exceptions.
 - Generate knockout fixtures in a standalone tested helper and represent undecided teams as null, so fixture creation never writes empty UUIDs.
+- Creating a match or tournament requires a signed-in profile (`requireSupabaseAuth`); viewing stays public. Profiles, friendships and permanent teams (`clubs`, `club_members`) are user-owned rows written from the browser under RLS, while tournament writes stay in server functions.
+- Squad rows link back to accounts through `players.profile_id` and `players.club_member_id`; career stats are derived from those links, never stored.

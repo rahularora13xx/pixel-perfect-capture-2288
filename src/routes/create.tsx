@@ -2,11 +2,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Check, ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { AppShell } from "@/components/kickoff/app-shell";
+import { RequireAccount } from "@/components/kickoff/account-gate";
 import { Button } from "@/components/ui/button";
 import { createTournament } from "@/lib/kickoff.functions";
+import { useAccount } from "@/lib/account";
 import { rememberTournament, shareOrigin, type TournamentDraft } from "@/lib/kickoff";
 
-export const Route=createFileRoute("/create")({head:()=>({meta:[{title:"Create tournament — Kickoff"},{name:"description",content:"Set up teams, rules and fixtures for a new football tournament."},{property:"og:title",content:"Create a tournament — Kickoff"},{property:"og:description",content:"Set up teams, rules and fixtures for a new football tournament."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:CreatePage});
+export const Route=createFileRoute("/create")({head:()=>({meta:[{title:"Create tournament — Kickoff"},{name:"description",content:"Set up teams, rules and fixtures for a new football tournament."},{property:"og:title",content:"Create a tournament — Kickoff"},{property:"og:description",content:"Set up teams, rules and fixtures for a new football tournament."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:CreateGate});
+function CreateGate(){return useAccount().status==="ready"?<CreatePage/>:<AppShell><RequireAccount reason="Sign in so the tournament is saved to your account and you can always get back to it.">{()=>null}</RequireAccount></AppShell>}
 const palette=["#FF5A36","#34D399","#60A5FA","#FBBF24","#F472B6","#A78BFA","#22D3EE","#FB7185","#84CC16","#E879F9"] as const;
 const makePlayers=(size:number)=>Array.from({length:size},(_,i)=>({name:i===0?"Goalkeeper":`Player ${i+1}`,jerseyNumber:i+1,position:(i===0?"GK":i<size-2?"MID":"FWD") as "GK"|"DEF"|"MID"|"FWD",isCaptain:i===1}));
 const initial: TournamentDraft={name:"",venue:"",startDate:"2026-10-03",scorerPin:"",teamSize:7,maxSubs:5,halfMinutes:20,extraTimeEnabled:true,extraTimeHalfMinutes:5,penaltiesEnabled:true,format:"round_robin",roundRobinLegs:1,seeding:"random",groupCount:1,advanceCount:4,teams:Array.from({length:4},(_,i)=>({name:`Team ${i+1}`,shortName:`T${i+1}X`,kitColor:palette[i] ?? "#84CC16",players:makePlayers(7)}))};

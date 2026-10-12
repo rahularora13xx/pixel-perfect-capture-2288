@@ -11,7 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CreateRouteImport } from './routes/create'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MeRouteImport } from './routes/me'
+import { Route as QuickMatchRouteImport } from './routes/quick-match'
+import { Route as ClubClubIdRouteImport } from './routes/club.$clubId'
 import { Route as TSlugRouteImport } from './routes/t.$slug'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as TSlugIndexRouteImport } from './routes/t.$slug.index'
 import { Route as TSlugCreatedRouteImport } from './routes/t.$slug.created'
 import { Route as TSlugManageRouteImport } from './routes/t.$slug.manage'
@@ -29,9 +34,34 @@ const CreateRoute = CreateRouteImport.update({
   path: '/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuickMatchRoute = QuickMatchRouteImport.update({
+  id: '/quick-match',
+  path: '/quick-match',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubClubIdRoute = ClubClubIdRouteImport.update({
+  id: '/club/$clubId',
+  path: '/club/$clubId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TSlugRoute = TSlugRouteImport.update({
   id: '/t/$slug',
   path: '/t/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TSlugIndexRoute = TSlugIndexRouteImport.update({
@@ -68,7 +98,12 @@ const TSlugTeamTeamIdRoute = TSlugTeamTeamIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
+  '/login': typeof LoginRoute
+  '/me': typeof MeRoute
+  '/quick-match': typeof QuickMatchRoute
+  '/club/$clubId': typeof ClubClubIdRoute
   '/t/$slug': typeof TSlugRouteWithChildren
+  '/u/$username': typeof UUsernameRoute
   '/t/$slug/created': typeof TSlugCreatedRoute
   '/t/$slug/manage': typeof TSlugManageRoute
   '/t/$slug/': typeof TSlugIndexRoute
@@ -79,6 +114,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
+  '/login': typeof LoginRoute
+  '/me': typeof MeRoute
+  '/quick-match': typeof QuickMatchRoute
+  '/club/$clubId': typeof ClubClubIdRoute
+  '/u/$username': typeof UUsernameRoute
   '/t/$slug/created': typeof TSlugCreatedRoute
   '/t/$slug/manage': typeof TSlugManageRoute
   '/t/$slug': typeof TSlugIndexRoute
@@ -90,7 +130,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
+  '/login': typeof LoginRoute
+  '/me': typeof MeRoute
+  '/quick-match': typeof QuickMatchRoute
+  '/club/$clubId': typeof ClubClubIdRoute
   '/t/$slug': typeof TSlugRouteWithChildren
+  '/u/$username': typeof UUsernameRoute
   '/t/$slug/created': typeof TSlugCreatedRoute
   '/t/$slug/manage': typeof TSlugManageRoute
   '/t/$slug/': typeof TSlugIndexRoute
@@ -103,7 +148,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/create'
+    | '/login'
+    | '/me'
+    | '/quick-match'
+    | '/club/$clubId'
     | '/t/$slug'
+    | '/u/$username'
     | '/t/$slug/created'
     | '/t/$slug/manage'
     | '/t/$slug/'
@@ -114,6 +164,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/create'
+    | '/login'
+    | '/me'
+    | '/quick-match'
+    | '/club/$clubId'
+    | '/u/$username'
     | '/t/$slug/created'
     | '/t/$slug/manage'
     | '/t/$slug'
@@ -124,7 +179,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/create'
+    | '/login'
+    | '/me'
+    | '/quick-match'
+    | '/club/$clubId'
     | '/t/$slug'
+    | '/u/$username'
     | '/t/$slug/created'
     | '/t/$slug/manage'
     | '/t/$slug/'
@@ -136,7 +196,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CreateRoute: typeof CreateRoute
+  LoginRoute: typeof LoginRoute
+  MeRoute: typeof MeRoute
+  QuickMatchRoute: typeof QuickMatchRoute
+  ClubClubIdRoute: typeof ClubClubIdRoute
   TSlugRoute: typeof TSlugRouteWithChildren
+  UUsernameRoute: typeof UUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -155,11 +220,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quick-match': {
+      id: '/quick-match'
+      path: '/quick-match'
+      fullPath: '/quick-match'
+      preLoaderRoute: typeof QuickMatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/club/$clubId': {
+      id: '/club/$clubId'
+      path: '/club/$clubId'
+      fullPath: '/club/$clubId'
+      preLoaderRoute: typeof ClubClubIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/t/$slug': {
       id: '/t/$slug'
       path: '/t/$slug'
       fullPath: '/t/$slug'
       preLoaderRoute: typeof TSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/t/$slug/': {
@@ -230,7 +330,12 @@ const TSlugRouteWithChildren = TSlugRoute._addFileChildren(TSlugRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CreateRoute: CreateRoute,
+  LoginRoute: LoginRoute,
+  MeRoute: MeRoute,
+  QuickMatchRoute: QuickMatchRoute,
+  ClubClubIdRoute: ClubClubIdRoute,
   TSlugRoute: TSlugRouteWithChildren,
+  UUsernameRoute: UUsernameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
