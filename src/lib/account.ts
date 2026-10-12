@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -46,9 +47,10 @@ export async function signInWithEmail(email: string, next: string) {
   const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: loginRedirect(next) } });
   if (error) throw new Error(error.message);
 }
-export async function signInWithGoogle(next: string) {
-  const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: loginRedirect(next) } });
-  if (error) throw new Error(error.message);
+/** Managed Google sign-in: opens the provider, sets the session, and returns once signed in. */
+export async function signInWithGoogle() {
+  const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+  if (result.error) throw result.error instanceof Error ? result.error : new Error(String(result.error));
 }
 export async function signOut() { await supabase.auth.signOut(); }
 
